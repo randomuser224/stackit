@@ -1,5 +1,5 @@
 // Offline cache. Bump VERSION when files change so phones pick up the update.
-const VERSION = 'stackit-v1';
+const VERSION = 'stackit-v2';
 const FILES = ['./', 'index.html', 'chart.umd.min.js', 'manifest.json', 'icons/apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
