@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stack It</title>
+<meta name="theme-color" content="#15181b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stack It">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#f4f5f6; --surface:#ffffff; --surface-2:#eceef0; --line:#d9dcdf;
+  --ink:#15181b; --ink-2:#4c535a; --ink-3:#7a828a;
+  --accent:#d35400; --accent-soft:#fbe7da; --accent-ink:#a84300;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#4a3aa7;
+  --contrib:#8fa3b8; --interest:#d35400; --goal:#15181b;
+  --good:#0b7a3e;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", Consolas, ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#111315; --surface:#1a1d20; --surface-2:#23272b; --line:#30353a;
+    --ink:#f2f3f4; --ink-2:#b9c0c6; --ink-3:#88919a;
+    --accent:#f0782f; --accent-soft:#3a2416; --accent-ink:#ff9a5c;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#9085e9;
+    --contrib:#5d7186; --interest:#f0782f; --goal:#f2f3f4; --good:#3fbf75;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#111315; --surface:#1a1d20; --surface-2:#23272b; --line:#30353a;
+  --ink:#f2f3f4; --ink-2:#b9c0c6; --ink-3:#88919a;
+  --accent:#f0782f; --accent-soft:#3a2416; --accent-ink:#ff9a5c;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#9085e9;
+  --contrib:#5d7186; --interest:#f0782f; --goal:#f2f3f4; --good:#3fbf75;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.55 var(--body);padding-inline:16px;padding-block:24px 64px}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:clamp(34px,6vw,58px);font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,32px);font-weight:800;letter-spacing:-.01em}
+h3{font-size:17px;font-weight:600}
+p{margin:0;max-width:65ch}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font:600 12px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-ink)}
+.muted{color:var(--ink-2)}
+.small{font-size:13px}
+section{display:flex;flex-direction:column;gap:20px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:end}
+.hero-copy{display:flex;flex-direction:column;gap:16px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.reasons{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.reasons li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline}
+.reasons li b{font:600 13px var(--mono);color:var(--accent-ink);min-width:3.2em}
+.hour{background:var(--ink);color:var(--bg);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:10px}
+.hour .big{font:800 clamp(40px,7vw,64px)/1 var(--display);color:var(--accent)}
+:root[data-theme="dark"] .hour .big{color:var(--accent)}
+.hour p{color:inherit;opacity:.85}
+.hour label{display:flex;gap:8px;align-items:center;font-size:13px;opacity:.85;flex-wrap:wrap}
+.hour input{width:84px;background:transparent;color:inherit;border:1px solid currentColor;border-radius:6px;padding:4px 8px;font:inherit;font-family:var(--mono)}
+
+/* panels */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+.chart-box{position:relative;height:340px;width:100%}
+.chart-box.tall{height:400px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:right;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{font:600 12px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+td.hot{color:var(--accent-ink);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:6px 14px;font:500 13px var(--body);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+.sw.line{height:3px;border-radius:2px;width:16px}
+.sw.dash{height:0;border-top:2px dashed var(--goal);width:16px;border-radius:0}
+
+/* calculator */
+.calc{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px;align-items:start}
+form{display:flex;flex-direction:column;gap:16px}
+fieldset{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+legend.fs{font:600 12px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:0;margin-bottom:4px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:13px;font-weight:500;color:var(--ink-2)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.in{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--surface);overflow:hidden}
+.in span{padding:0 10px;color:var(--ink-3);font-family:var(--mono);font-size:13px}
+.in input,select{border:0;background:transparent;color:var(--ink);font:500 15px var(--mono);padding:9px 10px;width:100%;min-width:0}
+select{border:1px solid var(--line);border-radius:8px;background:var(--surface);font-family:var(--body);font-size:14px}
+.in:focus-within{outline:2px solid var(--accent);outline-offset:1px}
+.in input:focus-visible{outline:none}
+input[type=range]{width:100%;accent-color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:0}
+.results{display:flex;flex-direction:column;gap:20px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.kpi{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.kpi .k{font-size:12px;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.kpi .v{font:600 clamp(17px,2.2vw,22px)/1.2 var(--mono);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kpi.main .v{color:var(--accent-ink);font-size:clamp(20px,2.8vw,28px)}
+.kpi .s{font-size:12px;color:var(--ink-2)}
+.goalbox{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.goalcell{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;background:var(--surface)}
+.goalcell .k{font-size:12px;color:var(--ink-3);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.goalcell .v{font:600 18px var(--mono)}
+.pill{display:inline-block;font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);align-self:flex-start}
+.pill.ok{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:8px;padding:8px 14px;font:600 13px var(--body);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.scen-list{display:flex;flex-wrap:wrap;gap:8px}
+.scen{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 12px;font-size:13px;background:var(--surface)}
+.scen button{border:0;background:var(--surface-2);color:var(--ink-2);border-radius:999px;width:22px;height:22px;cursor:pointer;font-size:14px;line-height:1}
+details summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:12px}
+.toprow{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+footer{border-top:1px solid var(--line);padding-top:20px;color:var(--ink-2);font-size:13px;display:flex;flex-direction:column;gap:8px}
+
+@media (max-width:900px){
+  .hero,.grid2,.calc{grid-template-columns:1fr}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  .goalbox{grid-template-columns:1fr}
+  .chart-box,.chart-box.tall{height:280px}
+}
+
+html{-webkit-text-size-adjust:100%}
+body{padding-top:calc(24px + env(safe-area-inset-top,0px));padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+.in input,select,.hour input{font-size:16px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- WHY -->
+<header class="hero">
+  <div class="hero-copy">
+    <span class="eyebrow">Read this before you spend it</span>
+    <h1>Every dollar I keep goes to work <em>for me</em>, every day, for decades.</h1>
+    <ul class="reasons">
+      <li><b>Time</b><span>Time is the biggest lever. The money barely moves for the first ten years. After that the curve bends up hard, and the last decade earns more than the first two combined.</span></li>
+      <li><b>Freedom</b><span>Savings buy options: turning down a bad job, taking time for school, covering an emergency without debt.</span></li>
+      <li><b>Rules</b><span>Start early, keep adding, and don't touch it. Pulling money out early flattens the hockey stick before it ever bends.</span></li>
+    </ul>
+  </div>
+  <aside class="hour" aria-live="polite">
+    <span class="eyebrow" style="color:inherit;opacity:.7">One hour of work, invested</span>
+    <div class="big num" id="hourBig">$476</div>
+    <p id="hourTxt">One hour at $24, left alone at 10% for 30 years.</p>
+    <label>Pay <input id="hourPay" type="number" value="24" min="1" step="1" aria-label="Hourly pay"> $/hr at
+      <input id="hourRate" type="number" value="10" min="0" step="0.5" aria-label="Rate percent"> % for
+      <input id="hourYrs" type="number" value="30" min="1" max="60" step="1" aria-label="Years"> yrs</label>
+  </aside>
+</header>
+
+<!-- PRESETS -->
+<section>
+  <div class="toprow">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span class="eyebrow">Reality check</span>
+      <h2>What <span id="amtLabel">$10,000</span> becomes, compounded monthly</h2>
+    </div>
+    <div class="chips" id="amtChips" role="group" aria-label="Starting amount"></div>
+  </div>
+  <div class="grid2">
+    <div class="panel scroll">
+      <table>
+        <thead><tr><th>Rate</th><th>10 yrs</th><th>20 yrs</th><th>30 yrs</th><th>Doubles every</th></tr></thead>
+        <tbody id="presetBody"></tbody>
+      </table>
+      <p class="small muted" style="margin-top:12px">One deposit, nothing added after. At 18%, the 30-year number is roughly 6× the 20-year number.</p>
+    </div>
+    <div class="panel" style="display:flex;flex-direction:column;gap:12px">
+      <div class="legend" id="presetLegend"></div>
+      <div class="chart-box"><canvas id="presetChart" aria-label="Growth at 10, 15 and 18 percent over 30 years"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- CALCULATOR -->
+<section id="calculator">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">Calculator</span>
+    <h2>Run your own numbers</h2>
+  </div>
+  <div class="calc">
+    <form class="panel" id="calcForm" autocomplete="off">
+      <fieldset>
+        <legend class="fs">Money</legend>
+        <div class="field"><label for="principal">Starting amount</label>
+          <div class="in"><span>$</span><input id="principal" type="number" min="0" step="100" value="10000"></div></div>
+        <div class="row">
+          <div class="field"><label for="contrib">Add each period</label>
+            <div class="in"><span>$</span><input id="contrib" type="number" min="0" step="25" value="200"></div></div>
+          <div class="field"><label for="contribFreq">How often</label>
+            <select id="contribFreq">
+              <option value="0">Never</option>
+              <option value="52">Weekly</option>
+              <option value="26">Every 2 weeks</option>
+              <option value="24">Twice a month</option>
+              <option value="12" selected>Monthly</option>
+              <option value="1">Yearly</option>
+            </select></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="timing">Deposit at</label>
+            <select id="timing"><option value="end" selected>End of period</option><option value="start">Start of period</option></select></div>
+          <div class="field"><label for="raise">Raise deposits yearly</label>
+            <div class="in"><input id="raise" type="number" min="0" step="1" value="0"><span>%</span></div></div>
+        </div>
+      </fieldset>
+      <hr>
+      <fieldset>
+        <legend class="fs">Growth</legend>
+        <div class="row">
+          <div class="field"><label for="rate">Annual rate</label>
+            <div class="in"><input id="rate" type="number" min="0" max="100" step="0.5" value="10"><span>%</span></div></div>
+          <div class="field"><label for="comp">Compounding</label>
+            <select id="comp">
+              <option value="1">Annually</option>
+              <option value="2">Semi-annually</option>
+              <option value="4">Quarterly</option>
+              <option value="12" selected>Monthly</option>
+              <option value="24">Semi-monthly</option>
+              <option value="26">Bi-weekly</option>
+              <option value="52">Weekly</option>
+              <option value="365">Daily</option>
+              <option value="inf">Continuously</option>
+            </select></div>
+        </div>
+        <div class="field"><label for="years">Years: <span class="num" id="yearsOut">30</span></label>
+          <input id="years" type="range" min="1" max="60" step="1" value="30"></div>
+      </fieldset>
+      <hr>
+      <fieldset>
+        <legend class="fs">Goal &amp; reality</legend>
+        <div class="row">
+          <div class="field"><label for="goal">Goal amount</label>
+            <div class="in"><span>$</span><input id="goal" type="number" min="0" step="1000" value="1000000"></div></div>
+          <div class="field"><label for="infl">Inflation</label>
+            <div class="in"><input id="infl" type="number" min="0" step="0.5" value="3"><span>%</span></div></div>
+        </div>
+      </fieldset>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn ghost" id="resetBtn">Reset to example</button>
+      </div>
+    </form>
+
+    <div class="results">
+      <div class="kpis">
+        <div class="kpi main"><span class="k">Final balance</span><span class="v" id="kFinal">–</span><span class="s" id="kFinalS"></span></div>
+        <div class="kpi"><span class="k">You put in</span><span class="v" id="kIn">–</span><span class="s" id="kInS"></span></div>
+        <div class="kpi"><span class="k">Interest earned</span><span class="v" id="kInt">–</span><span class="s" id="kIntS"></span></div>
+        <div class="kpi"><span class="k">In today's dollars</span><span class="v" id="kReal">–</span><span class="s" id="kRealS"></span></div>
+      </div>
+
+      <div class="panel" style="display:flex;flex-direction:column;gap:12px">
+        <div class="legend">
+          <span><i class="sw" style="background:var(--contrib)"></i>Money you put in</span>
+          <span><i class="sw" style="background:var(--interest)"></i>Interest (money you didn't work for)</span>
+          <span><i class="sw dash"></i>Goal</span>
+        </div>
+        <div class="chart-box tall"><canvas id="mainChart" aria-label="Balance over time split into contributions and interest"></canvas></div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <h3>Goal: <span class="num" id="goalLabel">$1,000,000</span></h3>
+        <div class="goalbox">
+          <div class="goalcell"><span class="k">You hit it</span><span class="v" id="gWhen">–</span><span class="pill" id="gPill">–</span></div>
+          <div class="goalcell"><span class="k">Rate needed in <span id="gYrs1">30</span> yrs</span><span class="v" id="gRate">–</span><span class="small muted">same deposits</span></div>
+          <div class="goalcell"><span class="k">Deposit needed in <span id="gYrs2">30</span> yrs</span><span class="v" id="gDep">–</span><span class="small muted">same rate</span></div>
+        </div>
+      </div>
+
+      <div class="panel" style="display:flex;flex-direction:column;gap:14px">
+        <div class="toprow">
+          <div><h3>Compare scenarios</h3><p class="small muted">Save the current settings, change something, and compare. Up to 4.</p></div>
+          <button type="button" class="btn" id="saveScen">Save current as scenario</button>
+        </div>
+        <div class="scen-list" id="scenList"></div>
+        <div class="chart-box"><canvas id="cmpChart" aria-label="Scenario comparison"></canvas></div>
+      </div>
+
+      <details class="panel">
+        <summary>Year-by-year table</summary>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Year</th><th>Put in that year</th><th>Interest that year</th><th>Total put in</th><th>Total interest</th><th>Balance</th></tr></thead>
+            <tbody id="yearBody"></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>Keep it honest.</strong> The S&amp;P 500 has averaged about 10% a year before inflation (about 7% after) over the long run, with some years down 30% or more. 15–18% a year sustained for decades is rare, so treat those rows as the best case and 7–10% as the plan.</p>
+  <p>Math: A = P(1 + r/n)<sup>nt</sup>, or Pe<sup>rt</sup> for continuous compounding. Deposits grow at the equivalent rate per deposit period. Not financial advice.</p>
+</footer>
+</div>
+
+<script src="chart.umd.min.js"></script>
+<script>
+(function(){
+const $ = id => document.getElementById(id);
+const fmt0 = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+const money = v => fmt0.format(Math.round(v));
+const short = v => {
+  const a = Math.abs(v);
+  if (a >= 1e9) return '$' + (v/1e9).toFixed(a>=1e10?0:1) + 'B';
+  if (a >= 1e6) return '$' + (v/1e6).toFixed(a>=1e7?1:2) + 'M';
+  if (a >= 1e3) return '$' + (v/1e3).toFixed(a>=1e5?0:1) + 'k';
+  return '$' + Math.round(v);
+};
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---------- engine ----------
+   Steps on a grid of s steps/year (the deposit frequency, or 12 if finer resolution needed).
+   Growth per step uses the equivalent rate so the lump-sum result matches A = P(1+r/n)^(nt) exactly. */
+function growthPerStep(r, comp, s){
+  if (comp === 'inf') return Math.exp(r / s);
+  const n = +comp;
+  return Math.pow(1 + r / n, n / s);
+}
+function simulate(p){
+  const r = p.rate / 100, k = +p.contribFreq, years = p.years;
+  const s = k >= 12 ? k : 12;               // k = 0 or 1 → monthly grid
+  const per = k ? s / k : Infinity;         // steps between deposits
+  const g = growthPerStep(r, p.comp, s);
+  let bal = p.principal, put = p.principal, dep = k ? p.contrib : 0;
+  const yearly = [{y:0, bal, put, int:0, putYr:0, intYr:0}];
+  let hit = p.principal >= p.goal && p.goal > 0 ? 0 : null;
+  let yrPut = 0, yrStartBal = bal;
+  const maxYears = p.searchYears || years;
+  for (let i = 0; i < maxYears * s; i++){
+    const inYear = i % s;
+    if (inYear === 0 && i > 0 && p.raise) dep *= 1 + p.raise / 100;
+    const isDep = k && ((p.timing === 'start' ? inYear : inYear + 1) % per === 0);
+    if (isDep && p.timing === 'start'){ bal += dep; put += dep; yrPut += dep; }
+    bal *= g;
+    if (isDep && p.timing !== 'start'){ bal += dep; put += dep; yrPut += dep; }
+    if (hit === null && p.goal > 0 && bal >= p.goal) hit = (i + 1) / s;
+    if (inYear === s - 1){
+      const y = (i + 1) / s;
+      if (y <= years){
+        const prev = yearly[yearly.length - 1];
+        yearly.push({y, bal, put, int: bal - put, putYr: yrPut, intYr: bal - yrStartBal - yrPut});
+      }
+      yrPut = 0; yrStartBal = bal;
+      if (y >= years && (hit !== null || !p.searchYears)) break;
+    }
+  }
+  const end = yearly[yearly.length - 1];
+  return {yearly, final: end.bal, put: end.put, interest: end.bal - end.put, hit};
+}
+
+/* ---------- hourly hero ---------- */
+function renderHour(){
+  const pay = +$('hourPay').value || 0, r = +$('hourRate').value || 0, y = +$('hourYrs').value || 0;
+  const v = pay * Math.pow(1 + r/100/12, 12*y);
+  $('hourBig').textContent = money(v);
+  $('hourTxt').textContent = `One hour at ${money(pay)}, left alone at ${r}% for ${y} years. That's ${(v/(pay||1)).toFixed(1)}× what you earned for it.`;
+}
+['hourPay','hourRate','hourYrs'].forEach(id => $(id).addEventListener('input', renderHour));
+
+/* ---------- presets ---------- */
+const AMOUNTS = [1000, 5000, 10000, 25000, 50000];
+const RATES = [10, 15, 18];
+let presetAmt = 10000;
+const chipsEl = $('amtChips');
+AMOUNTS.forEach(a => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'chip'; b.textContent = short(a);
+  b.setAttribute('aria-pressed', a === presetAmt);
+  b.onclick = () => { presetAmt = a; [...chipsEl.children].forEach(c => c.setAttribute('aria-pressed', c === b)); renderPresets(); };
+  chipsEl.appendChild(b);
+});
+function fv(P, r, years){ return P * Math.pow(1 + r/100/12, 12*years); }
+let presetChart, mainChart, cmpChart;
+const seriesVars = ['--s1','--s2','--s3','--s4'];
+
+function baseOpts(yFmt){
+  const ink2 = css('--ink-2'), line = css('--line');
+  return {
+    responsive:true, maintainAspectRatio:false, animation:{duration:250},
+    interaction:{mode:'index', intersect:false},
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:css('--surface'), titleColor:css('--ink'), bodyColor:css('--ink'), borderColor:line, borderWidth:1, padding:10,
+        titleFont:{family:'Public Sans', weight:'600'}, bodyFont:{family:'JetBrains Mono'},
+        callbacks:{title: it => 'Year ' + it[0].label, label: c => ` ${c.dataset.label}: ${money(c.parsed.y)}`}}},
+    scales:{
+      x:{grid:{display:false}, border:{color:line}, ticks:{color:ink2, font:{family:'JetBrains Mono', size:11}, maxRotation:0, autoSkip:true, maxTicksLimit:8, callback(v){ return this.getLabelForValue(v); }},
+         title:{display:true, text:'Years', color:ink2, font:{family:'Public Sans', size:12}}},
+      y:{grid:{color:line, drawTicks:false}, border:{display:false}, ticks:{color:ink2, padding:8, font:{family:'JetBrains Mono', size:11}, callback: yFmt || (v => short(v))}, beginAtZero:true}
+    },
+    elements:{point:{radius:0, hoverRadius:5, hoverBorderWidth:2, hoverBorderColor:css('--surface')}, line:{borderWidth:2, tension:0}}
+  };
+}
+
+function renderPresets(){
+  $('amtLabel').textContent = money(presetAmt);
+  const body = $('presetBody'); body.innerHTML = '';
+  RATES.forEach(r => {
+    const tr = document.createElement('tr');
+    const dbl = Math.log(2) / (12 * Math.log(1 + r/100/12));
+    tr.innerHTML = `<td><strong>${r}%</strong></td>` +
+      [10,20,30].map((y,i) => `<td class="num${i===2?' hot':''}">${money(fv(presetAmt, r, y))}</td>`).join('') +
+      `<td class="num">${dbl.toFixed(1)} yrs</td>`;
+    body.appendChild(tr);
+  });
+  $('presetLegend').innerHTML = RATES.map((r,i) => `<span><i class="sw line" style="background:var(${seriesVars[i]})"></i>${r}% a year</span>`).join('');
+  const labels = Array.from({length:31}, (_, i) => i);
+  const data = {labels, datasets: RATES.map((r,i) => ({label: r + '%', data: labels.map(y => fv(presetAmt, r, y)), borderColor: css(seriesVars[i]), backgroundColor: css(seriesVars[i])}))};
+  if (presetChart) { presetChart.data = data; presetChart.options = baseOpts(); presetChart.update(); }
+  else presetChart = new Chart($('presetChart'), {type:'line', data, options: baseOpts()});
+}
+
+/* ---------- calculator ---------- */
+const FIELDS = ['principal','contrib','contribFreq','timing','raise','rate','comp','years','goal','infl'];
+const DEFAULTS = {principal:10000, contrib:200, contribFreq:'12', timing:'end', raise:0, rate:10, comp:'12', years:30, goal:1000000, infl:3};
+const FREQ_NAME = {'0':'deposit','52':'week','26':'2 weeks','24':'half-month','12':'month','1':'year'};
+let scenarios = [];
+
+function read(){
+  const p = {};
+  FIELDS.forEach(f => { const v = $(f).value; p[f] = ['contribFreq','timing','comp'].includes(f) ? v : Math.max(0, parseFloat(v) || 0); });
+  p.years = Math.max(1, Math.round(p.years));
+  return p;
+}
+function write(p){ FIELDS.forEach(f => { if (p[f] !== undefined) $(f).value = p[f]; }); }
+function save(){ try { localStorage.setItem('stackit.v1', JSON.stringify({inputs: read(), scenarios})); } catch(e){} }
+function load(){ try { const s = JSON.parse(localStorage.getItem('stackit.v1')); if (s){ write(s.inputs || {}); scenarios = s.scenarios || []; } } catch(e){} }
+
+function solveRate(p){
+  const f = r => simulate({...p, rate:r, searchYears:0}).final;
+  if (f(0) >= p.goal) return 0;
+  let lo = 0, hi = 200;
+  if (f(hi) < p.goal) return null;
+  for (let i = 0; i < 60; i++){ const m = (lo+hi)/2; f(m) >= p.goal ? hi = m : lo = m; }
+  return hi;
+}
+function solveDeposit(p){
+  const freq = p.contribFreq === '0' ? '12' : p.contribFreq;
+  const q = {...p, contribFreq: freq, searchYears:0};
+  const b0 = simulate({...q, contrib:0}).final, b1 = simulate({...q, contrib:1}).final;
+  if (b0 >= p.goal) return {amt:0, freq};
+  return {amt: (p.goal - b0) / (b1 - b0), freq};
+}
+function label(p){
+  const d = +p.contribFreq ? ` + ${short(p.contrib)}/${FREQ_NAME[p.contribFreq]}` : '';
+  return `${short(p.principal)} @ ${p.rate}%${d}, ${p.years}y`;
+}
+
+function render(){
+  const p = read();
+  $('yearsOut').textContent = p.years;
+  const res = simulate(p);
+  const realF = res.final / Math.pow(1 + p.infl/100, p.years);
+
+  $('kFinal').textContent = money(res.final);
+  $('kFinalS').textContent = `after ${p.years} years`;
+  $('kIn').textContent = money(res.put);
+  $('kInS').textContent = `${(res.put / res.final * 100 || 0).toFixed(0)}% of the total`;
+  $('kInt').textContent = money(res.interest);
+  $('kIntS').textContent = `${(res.interest / res.final * 100 || 0).toFixed(0)}% of the total`;
+  $('kReal').textContent = money(realF);
+  $('kRealS').textContent = `at ${p.infl}% inflation`;
+
+  // goal
+  $('goalLabel').textContent = money(p.goal);
+  $('gYrs1').textContent = $('gYrs2').textContent = p.years;
+  const pill = $('gPill');
+  if (p.goal <= 0){ $('gWhen').textContent = '–'; pill.textContent = 'Set a goal'; pill.className = 'pill'; }
+  else {
+    const h = simulate({...p, searchYears: 150}).hit;
+    if (h === 0){ $('gWhen').textContent = 'Already there'; pill.textContent = 'Done'; pill.className = 'pill ok'; }
+    else if (h === null){ $('gWhen').textContent = '150+ years'; pill.textContent = 'Out of reach'; pill.className = 'pill'; }
+    else {
+      const yrs = Math.floor(h + 1e-9), mo = Math.round((h - yrs) * 12);
+      $('gWhen').textContent = `${yrs} yr${mo ? ' ' + mo + ' mo' : ''}`;
+      const ok = h <= p.years;
+      pill.textContent = ok ? `${(p.years - h).toFixed(1)} yrs early` : `${(h - p.years).toFixed(1)} yrs past your timeline`;
+      pill.className = ok ? 'pill ok' : 'pill';
+    }
+    const rr = solveRate(p);
+    $('gRate').textContent = rr === null ? 'Over 200%' : rr.toFixed(2) + '%';
+    const dd = solveDeposit(p);
+    $('gDep').textContent = `${money(Math.ceil(dd.amt))} / ${FREQ_NAME[dd.freq]}`;
+  }
+
+  // main chart
+  const labels = res.yearly.map(r => r.y);
+  const contribC = css('--contrib'), intC = css('--interest'), goalC = css('--goal');
+  const ds = [
+    {label:'Put in', data: res.yearly.map(r => r.put), backgroundColor: contribC, borderColor: contribC, fill:'origin', stack:'s', order:2},
+    {label:'Interest', data: res.yearly.map(r => r.int), backgroundColor: intC, borderColor: intC, fill:'-1', stack:'s', order:1},
+  ];
+  if (p.goal > 0) ds.push({label:'Goal', data: labels.map(() => p.goal), borderColor: goalC, borderDash:[6,5], borderWidth:1.5, fill:false, pointHoverRadius:0, stack:'g', order:0});
+  const o = baseOpts();
+  o.scales.y.stacked = true;
+  o.plugins.tooltip.callbacks.footer = it => { const i = it[0].dataIndex; return 'Balance: ' + money(res.yearly[i].bal); };
+  o.plugins.tooltip.footerFont = {family:'JetBrains Mono', weight:'600'};
+  o.plugins.tooltip.footerColor = css('--accent-ink');
+  // keep goal line from blowing the scale when it's far above the balance
+  if (p.goal > res.final * 3) o.scales.y.suggestedMax = undefined, ds.pop();
+  const data = {labels, datasets: ds};
+  if (mainChart){ mainChart.data = data; mainChart.options = o; mainChart.update(); }
+  else mainChart = new Chart($('mainChart'), {type:'line', data, options:o});
+
+  // year table
+  $('yearBody').innerHTML = res.yearly.slice(1).map(r =>
+    `<tr><td class="num">${r.y}</td><td class="num">${money(r.putYr)}</td><td class="num">${money(r.intYr)}</td><td class="num">${money(r.put)}</td><td class="num">${money(r.int)}</td><td class="num"><strong>${money(r.bal)}</strong></td></tr>`
+  ).join('');
+
+  renderCompare(p, res);
+  save();
+}
+
+function renderCompare(p, res){
+  const list = $('scenList'); list.innerHTML = '';
+  scenarios.forEach((s, i) => {
+    const el = document.createElement('span'); el.className = 'scen';
+    el.innerHTML = `<i class="sw line" style="background:var(${seriesVars[i]})"></i><span>${label(s)}</span>`;
+    const x = document.createElement('button'); x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label','Remove scenario');
+    x.onclick = () => { scenarios.splice(i, 1); render(); };
+    el.appendChild(x); list.appendChild(el);
+  });
+  const cur = document.createElement('span'); cur.className = 'scen'; cur.style.paddingRight = '12px';
+  cur.innerHTML = `<i class="sw line" style="background:var(--ink)"></i><span>Current: ${label(p)}</span>`;
+  list.appendChild(cur);
+  $('saveScen').disabled = scenarios.length >= 4;
+
+  const maxY = Math.max(p.years, ...scenarios.map(s => s.years));
+  const labels = Array.from({length: maxY + 1}, (_, i) => i);
+  const ser = (s) => { const r = simulate(s).yearly; return labels.map(y => r[y] ? r[y].bal : null); };
+  const datasets = scenarios.map((s, i) => ({label: label(s), data: ser(s), borderColor: css(seriesVars[i]), backgroundColor: css(seriesVars[i])}));
+  datasets.push({label: 'Current', data: ser(p), borderColor: css('--ink'), backgroundColor: css('--ink'), borderDash:[4,3]});
+  const o = baseOpts();
+  const data = {labels, datasets};
+  if (cmpChart){ cmpChart.data = data; cmpChart.options = o; cmpChart.update(); }
+  else cmpChart = new Chart($('cmpChart'), {type:'line', data, options:o});
+}
+
+$('saveScen').onclick = () => { if (scenarios.length < 4){ scenarios.push(read()); render(); } };
+$('resetBtn').onclick = () => { write(DEFAULTS); render(); };
+FIELDS.forEach(f => $(f).addEventListener('input', render));
+$('calcForm').addEventListener('submit', e => e.preventDefault());
+
+/* example scenarios on first visit so the compare chart isn't empty */
+load();
+if (!scenarios.length){
+  scenarios = [
+    {...DEFAULTS, contribFreq:'0', contrib:0},
+    {...DEFAULTS, contribFreq:'0', contrib:0, rate:15},
+    {...DEFAULTS, contribFreq:'0', contrib:0, rate:18},
+  ];
+}
+
+function renderAll(){ renderHour(); renderPresets(); render(); }
+renderAll();
+
+/* repaint charts when the theme changes */
+const rerender = () => { [presetChart, mainChart, cmpChart].forEach(c => c && c.destroy()); presetChart = mainChart = cmpChart = null; renderAll(); };
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rerender); } catch(e){}
+new MutationObserver(rerender).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
